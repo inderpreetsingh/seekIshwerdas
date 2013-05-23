@@ -1,50 +1,68 @@
-
+<!--**********************************
+~Filename: Map3.html
+~Description: Just a proof of concept for complete Seek App
+~version: 0.1
+~Author: Inderpreet Singh Ishwerdas (ishwerdas.com)
+~Date Created: 11th March, 2013
+~Date Last Modified: 23 May, 2013
+***************************** -->
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+	<meta charset = "UTF-8">
+	<title> SEEK, Ishwerdas </title>
+</head>
+<body>
+<!-- Division that will contain the map -->
 <div id="map"> </div>  
+
+<!-- Remote javascript for Open Layers API -->
 <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
-<script type="text/javascript""> 
 
+<!-- Using Open Layers API to show current location -->
+<script type="text/javascript"> 
+	window.onload = initiate_geolocation(); // initiate Geolocation API after window loads
 
-window.onload = initiate_geolocation();
-function initiate_geolocation(){
-	if (navigator.geolocation){
-		navigator.geolocation.getCurrentPosition(handle_geolocation_query, handle_geolocation_errors, {enableHighAccuracy:true});
+	/* function to initiage geolocation and report error if not supported */
+	function initiate_geolocation(){
+		if (navigator.geolocation){
+			navigator.geolocation.getCurrentPosition(
+				handle_geolocation_query, //function that will handle the geolocation query
+				handle_geolocation_errors, { // function callback for errors
+				enableHighAccuracy:true // enabling high accuracy, will take more time but accurate
+			});
+		}
+		else { 
+			alert ("geolocation not supported"); 
+		}
 	}
-	else { 
-		alert ("geolocation not supported"); 
-	}
-}
-function handle_geolocation_query(position){
-map = new OpenLayers.Map("map");
-    map.addLayer(new OpenLayers.Layer.OSM());
+	
+	/* function to handle and show position on map */
+	function handle_geolocation_query(position){
+		map = new OpenLayers.Map("map");
+		map.addLayer(new OpenLayers.Layer.OSM());
+    		var lonLat = new OpenLayers.LonLat(position.coords.longitude,position.coords.latitude)
+          			.transform(
+           				 new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            				map.getProjectionObject() // to Spherical Mercator Projection
+          			);
  
-    var lonLat = new OpenLayers.LonLat(position.coords.longitude, position.coords.latitude )
-          .transform(
-            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-            map.getProjectionObject() // to Spherical Mercator Projection
-          );
- 
-    var zoom=16;
- 
-    var markers = new OpenLayers.Layer.Markers( "Markers" );
-    map.addLayer(markers);
- 
-    markers.addMarker(new OpenLayers.Marker(lonLat));
- 
-    map.setCenter (lonLat, zoom);
-}
-
-function handle_geolocation_errors(error)
-{
-	switch(error.code)
-		{
+    		var zoom=16; 
+    		var markers = new OpenLayers.Layer.Markers( "Markers" );
+    		map.addLayer(markers);
+ 		markers.addMarker(new OpenLayers.Marker(lonLat));
+		map.setCenter (lonLat, zoom);
+	}	
+	
+	/* function to handle errors */
+	function handle_geolocation_errors(error){
+		switch(error.code){
 			case error.PERMISSION_DENIED: alert ("user did not share geolocation data");
 			break;
-
 			case error.POSITION_UNAVAILABLE: alert("could not detect current position");
 			break;
-
 			case error.TIMEOUT: alert("retrieving position time out");
 			break;
 		}
-}
+	}	
 </script>
